@@ -1,16 +1,138 @@
-// ❌ 錯誤寫法：沒有阻止表單預設行為
-document.getElementById('nameForm').addEventListener('submit', function() {
-    goToLobby();
-});
-
-// ✅ 正確修復：加入 e.preventDefault()
-document.getElementById('nameForm').addEventListener('submit', function(e) {
-    e.preventDefault(); // 阻止頁面重新整理
-    const playerName = document.getElementById('usernameInput').value.trim();
-    
-    if (playerName !== "") {
-        enterLobby(playerName);
-    } else {
-        alert("請輸入有效的名字！");
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML 遊戲大廳</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
     }
-});
+
+    body {
+      background-color: #1a1a2e;
+      color: #ffffff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .card {
+      background-color: #16213e;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+      text-align: center;
+      width: 320px;
+    }
+
+    h2, h1 {
+      margin-bottom: 20px;
+      color: #e94560;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #0f3460;
+      border-radius: 6px;
+      outline: none;
+      background-color: #0f3460;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #e94560;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background-color: #0f3460;
+    }
+
+    /* 預設隱藏大廳畫面 */
+    #lobbyScreen {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 1. 輸入名字畫面 -->
+  <div id="loginScreen" class="card">
+    <h2>玩家登入</h2>
+    <form id="nameForm">
+      <input type="text" id="usernameInput" placeholder="請輸入名字..." required autocomplete="off">
+      <button type="submit">進入遊戲大廳</button>
+    </form>
+  </div>
+
+  <!-- 2. 遊戲大廳畫面 -->
+  <div id="lobbyScreen" class="card">
+    <h1 id="welcomeText">歡迎進入大廳</h1>
+    <p style="margin-bottom: 20px; color: #a2a2a2;">準備好開始對戰了嗎？</p>
+    <button id="startGameBtn" style="margin-bottom: 10px;">開始遊戲</button>
+    <button id="logoutBtn" style="background-color: #53565a;">切換名字</button>
+  </div>
+
+  <script>
+    // 取得 DOM 元素
+    const loginScreen = document.getElementById('loginScreen');
+    const lobbyScreen = document.getElementById('lobbyScreen');
+    const nameForm = document.getElementById('nameForm');
+    const usernameInput = document.getElementById('usernameInput');
+    const welcomeText = document.getElementById('welcomeText');
+    const logoutBtn = document.getElementById('logoutBtn');
+
+    // 處理進入大廳的邏輯
+    function enterLobby(name) {
+      welcomeText.innerText = `歡迎，${name}！`;
+      loginScreen.style.display = 'none';
+      lobbyScreen.style.display = 'block';
+    }
+
+    // 表單提交事件監聽
+    nameForm.addEventListener('submit', function(e) {
+      e.preventDefault(); // 核心修復：阻止頁面刷新重新載入
+      
+      const name = usernameInput.value.trim();
+      if (name) {
+        localStorage.setItem('gamePlayerName', name); // 儲存名字
+        enterLobby(name);
+      } else {
+        alert('請輸入有效的玩家名字！');
+      }
+    });
+
+    // 返回/切換名字邏輯
+    logoutBtn.addEventListener('click', function() {
+      localStorage.removeItem('gamePlayerName');
+      usernameInput.value = '';
+      lobbyScreen.style.display = 'none';
+      loginScreen.style.display = 'block';
+    });
+
+    // 頁面載入時檢查是否已有儲存的名字
+    window.addEventListener('DOMContentLoaded', function() {
+      const savedName = localStorage.getItem('gamePlayerName');
+      if (savedName) {
+        enterLobby(savedName);
+      }
+    });
+  </script>
+
+</body>
+</html>
